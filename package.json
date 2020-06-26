@@ -1,0 +1,17 @@
+{
+  "name": "emmy-sensehat-notification",
+  "version": "1.0.0",
+  "description": "A simple script that checks which is the closest Emmy scooterand displays details on my personal Raspberry Pi Sensehad LED display",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andrei Fitai",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "node-cache": "^5.1.1",
+    "sense-hat-led": "^1.2.0",
+    "superagent": "^5.2.2"
+  }
+}
