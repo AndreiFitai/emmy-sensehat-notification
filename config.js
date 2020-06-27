@@ -1,6 +1,8 @@
 require("dotenv").config();
 
 module.exports = {
+  PORT: 3000,
+
   // set api base URLS
   EMMY_API_URL: "https://emio-frontend.com/api/prod/v2.07/",
   MAPQUEST_BASE_URL: "http://open.mapquestapi.com/geocoding/v1/address",
@@ -9,9 +11,9 @@ module.exports = {
 
   MIN_FUEL_LEVEL: 15,
 
-  // Where i live - please don't stalk ;)
-  HOME_LATITUDE: process.env.HOME_LATITUDE,
-  HOME_LONGITUDE: process.env.HOME_LONGITUDE,
+  // Where i live - Street name and number and postal code
+  HOME_ADDRESS: process.env.HOME_ADDRESS,
+  TOWN: 'Berlin',
 
   // Where to look for scooters 
   AREA_LATITUDE1: "52.551474",

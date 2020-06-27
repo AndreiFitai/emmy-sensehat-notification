@@ -4,6 +4,8 @@
   "description": "A simple script that checks which is the closest Emmy scooterand displays details on my personal Raspberry Pi Sensehad LED display",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev" : "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Andrei Fitai",
@@ -13,5 +15,8 @@
     "node-cache": "^5.1.1",
     "sense-hat-led": "^1.2.0",
     "superagent": "^5.2.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
   }
 }
