@@ -1,25 +1,31 @@
-const http = require('http');
+const http = require("http");
 const NodeCache = require("node-cache");
-const ScootCheck = require("./src/ScootCheck")
-const { getCoordinates } = require('./src/utils')
+const Scoot = require("./src/Scoot");
+const { setConfigCoordinates } = require("./src/utils");
 
-const {PORT, HOME_ADDRESS} = require("./config");
+const config = require("./config");
 
 const main = async () => {
   const cache = new NodeCache();
 
-  const homeCoordinates = getCoordinates(HOME_ADDRESS);
+  const configWithCoords = await setConfigCoordinates(config);
 
-  const scootCheck = new ScootCheck(cache, homeCoordinates);
+  const scoot = new Scoot(cache, configWithCoords);
 
-  http.createServer(async (req, res) =>{
-    let result = await scootCheck.getClosestScooter();
-    console.log('----- result ------', result);
-    res.write('hello woild'); //write a response
-    res.end(); //end the response
-  }).listen(PORT, () =>{
-  console.log(`server start at - http://localhost:${PORT}`); //the server object listens on port 3000
-  });
+  http
+    .createServer(async (req, res) => {
+      if (req.url != "/favicon.ico") {
+        let result = await scoot.getClosestScooter();
+
+        res.write(
+          `Closest scooter is ${result.distanceData.duration} seconds away`
+        );
+        res.end();
+      }
+    })
+    .listen(config.PORT, () => {
+      console.log(`Server started at - http://localhost:${config.PORT}`); //the server object listens on port 3000
+    });
 };
 
 main();

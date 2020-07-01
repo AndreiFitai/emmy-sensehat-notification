@@ -1,6 +1,6 @@
 const request = require("superagent");
 
-const { MAPQUEST_API_KEY, MAPQUEST_BASE_URL, TOWN } = require('../config');
+const { GEOCODING_API_URL, MAPS_API_KEY, TOWN } = require("../config");
 
 const hashFunction = (key) => {
   var hash = 0;
@@ -10,13 +10,13 @@ const hashFunction = (key) => {
   return hash;
 };
 
-async function getCoordinates(addressWithZipCode) {
-  const { body: geocoding } = await request.get(MAPQUEST_BASE_URL).query({
-    key: MAPQUEST_API_KEY,
-    location: `${addressWithZipCode},${TOWN}`,
+async function getCoordinates(address) {
+  const { body: data } = await request.get(GEOCODING_API_URL).query({
+    address: `${address},${TOWN}`,
+    key: MAPS_API_KEY,
   });
 
-  const { lat, lng } = geocoding.results[0]?.locations[0]?.latLng;
+  const { lat, lng } = data.results[0]?.geometry.location;
 
   if (!lat || !lng) {
     //TODO figure out what to do in case we can't find coordinates
@@ -24,4 +24,18 @@ async function getCoordinates(addressWithZipCode) {
   return { lat, lng };
 }
 
-module.exports = { hashFunction, getCoordinates };
+async function setConfigCoordinates(config) {
+  const addresses = ["AREA_ADDRESS1", "AREA_ADDRESS2"];
+
+  for (const address of addresses) {
+    if (config[address]) {
+      let { lat, lng } = await getCoordinates(config[address]);
+      config[`${address}_LAT`] = lat;
+      config[`${address}_LNG`] = lng;
+    }
+  }
+
+  return config;
+}
+
+module.exports = { hashFunction, setConfigCoordinates };

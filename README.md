@@ -1,25 +1,23 @@
 ## TODO
 
-- sort scooters by time to reach.
-- set up node-cron to retreive data once in a while
 - set up proper error handling and logging
-- simple page to be accessed locally and display details.
-- implement a map with the directions ( maybe a redirect to google maps )
+- simple page to be accessed locally and display details and route to closest scooter
 
 ## Requirements
+
 - NodeJS 14.4
 - OpenSourceRouting.org API Key ( free )
 - MapQuest.com API Key ( free )
 
 ## Details
+
 I want to know in a glance if i should take public transport or if i can easily rent an Emmy scooter ( https://emmy-sharing.de/en/ ) near my apartment.
 This will run on my Raspberry Pi and using the attached SenseHats LED Matrix, it will display the walking distance in meters and minutes to the closest scooter.
 I want to add a simple webpage that i can access locally for more functionality.
 
-This project is using MapQuest.com's open source API ( relies solely on data contributed by OpenStreetMap ) and OpenRouteService.org API.
+For geocodding and routing i'm using Google Maps API.
 
-Using mapquest open source api to get scooter coordinates as their api is easy to use, good free tier and with good results.
+I initially wanted to use the opensource geocodding api offered by MapQuest and the routing api offered by openrouteservice.org however there are issues with both services.
 
-Using opensourcerouting api to figure out walking distance and time from home to the scooter.
-
-Theoretically i could use mapquests open source routing api which accepts coordinates and addresses to calculate walking distance thus eliminating the need to do 2 seperate calls to get the distance and time, however the results are not accurate compared to opensourcerouting ( as baseline i manually compared to google maps directions )
+- MapQuests api doesn't geocode German specific addresses properly ( e.g. "B96a 70e, 10437, Berlin" returns coordinates located in Kansas and don't worry it's a coincidence there's a small town called Oberlin there )
+- openrouteservice.org doesn't have enough walking route accuracy for my personal preference and in some cases where the scooter was 50 meters away from my home it suggested a way longer route.
