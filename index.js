@@ -12,19 +12,18 @@ const main = async () => {
 
   const scoot = new Scoot(cache, configWithCoords);
 
-  http
-    .createServer(async (req, res) => {
+  http.createServer(async (req, res) => {
       if (req.url != "/favicon.ico") {
-        let result = await scoot.getClosestScooter();
+        let { distanceData } = scoot.closestScoot;
 
         res.write(
-          `Closest scooter is ${result.distanceData.duration} seconds away`
+          `Closest scooter is ${distanceData.duration} minutes away and ${distanceData.distance} meters away`
         );
         res.end();
       }
     })
     .listen(config.PORT, () => {
-      console.log(`Server started at - http://localhost:${config.PORT}`); //the server object listens on port 3000
+      console.log(`Server started at - http://localhost:${config.PORT}`);
     });
 };
 

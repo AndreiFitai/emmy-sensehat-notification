@@ -1,43 +1,21 @@
 const request = require("superagent");
-const { hashFunction } = require("./utils");
+const { hashFunction, getDistanceData} = require("./utils");
 
 // temporary solution since i'm not developing on the RpI
 let sense;
 try {
   sense = require("sense-hat-led");
+  console.log("----- SenseHat was detected ! ------");
 } catch (e) {
-  console.log("Can't detect a SenseHat attached");
+  console.log("----- Can't detect a SenseHat attached to system ! ------");
 }
 
 module.exports = class Scoot {
   constructor(cache, config) {
     this.cache = cache;
     this.config = config;
+    this.closestScoot = {};
     this.init();
-  }
-
-  async getScooterDistance(scooterAddress) {
-    const { body: result } = await request
-      .get(this.config.DISTANCES_API_URL)
-      .query({
-        units: "metric",
-        mode: "walking",
-        region: "de", // This param influences results ( Region Biasing )
-        origins: this.config.HOME_ADDRESS,
-        destinations: scooterAddress,
-        key: this.config.MAPS_API_KEY,
-      });
-
-    const {
-      distance: { value: distance },
-      duration: { value: duration },
-    } = result.rows[0]?.elements[0];
-
-    if (!distance || !duration) {
-      //TODO same as above - needs to be handled
-    }
-
-    return { distance, duration };
   }
 
   async getClosestScooter() {
@@ -51,7 +29,7 @@ module.exports = class Scoot {
           lon2: this.config.AREA_ADDRESS2_LNG,
         });
 
-      //let's not look at scooters without enough juice
+      //let's not look at scooters without enough "juice"
       let hasEnoughFuel = data.filter((scooter) => {
         return scooter.fuelLevel > this.config.MIN_FUEL_LEVEL;
       });
@@ -65,7 +43,7 @@ module.exports = class Scoot {
 
         //check if we already have the coordinates/data necesary, if not get it
         if (scooter.distanceData == undefined) {
-          let distanceData = await this.getScooterDistance(formattedAddress);
+          let distanceData = await getDistanceData(formattedAddress);
           this.cache.set(hash, distanceData, this.config.CACHE_DATA_TIMEOUT);
           scooter.distanceData = distanceData;
         } else {
@@ -77,6 +55,8 @@ module.exports = class Scoot {
       const closestScooter = hasEnoughFuel.reduce((min, curr) =>
         min.distanceData.duration < curr.distanceData.duration ? min : curr
       );
+      // no point in saving walking duration in seconds so i'm converting it to minutes and rounding up
+      closestScooter.distanceData.duration = Math.round(closestScooter.distanceData.duration / 60)
 
       return closestScooter;
     } catch (e) {
@@ -84,27 +64,46 @@ module.exports = class Scoot {
     }
   }
 
-  displayClosestScoot(whatToDispolay) {
-    sense.lowLight = true;
-
-    // testing persistent message display
-    const whatever = () =>
-      sense.showMessage(
-        whatToDispolay,
-        0.2,
-        this.config.PI_TEXT_COLOR,
-        this.config.PI_BG_COLOR,
-        done
-      );
-    function done() {
-      whatever();
-    }
+  async refreshClosestScooter(){
+    // gets the closest scooter every 15 minutes
+    this.closestScoot = await this.getClosestScooter();
+    setTimeout(() => {
+      this.refreshClosestScooter()
+    }, 900000);
   }
 
-  init() {
+  async displayOnPi() {
+    let message;
+    sense.lowLight = true;
+    // make sure orientation on the rPI is optimal
+    sense.setRotation(180)
+    let isDisplayClear = true;
+
+    setInterval(() => {
+      if(this.closestScoot){
+        const { distanceData: { distance, duration} } =  this.closestScoot;
+        message = ` ${duration} mins - ${distance} m `
+      } else {
+        message = "No scooter nearby :("
+      }
+      if(isDisplayClear) {
+        sense.showMessage(
+          message,
+          0.05,
+          this.config.PI_TEXT_COLOR,
+          this.config.PI_BG_COLOR,
+          () => { isDisplayClear = true}
+        );
+      }
+      isDisplayClear = false;
+    }, 2000);
+  }
+  
+
+  async init() {
+    this.refreshClosestScooter();
     if (sense) {
-      console.log("----- SenseHat was detected ! ------");
-      this.displayClosestScoot();
+      this.displayOnPi();
     }
   }
 };

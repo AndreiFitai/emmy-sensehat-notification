@@ -24,15 +24,16 @@ module.exports = {
   AREA_ADDRESS2: "Pieskower Weg 16-46, 10409",
 
   //* Optional can use coordinates instead of addresses to define search area
-  // AREA_ADDRESS1_LAT: "52.554534",
-  // HOME_ADDRESS1_LNG: "13.429695",
-  // AREA_ADDRESS2_LAT: "52.540896",
-  // HOME_ADDRESS2_LNG: "13.444144",
+  //* If both coordinates and addresses are present, coordinates will be prioritized
+  AREA_ADDRESS1_LAT: "52.554534",
+  AREA_ADDRESS1_LNG: "13.429695",
+  AREA_ADDRESS2_LAT: "52.540896",
+  AREA_ADDRESS2_LNG: "13.444144",
 
   // how many seconds to keep scooter data in cache
   CACHE_DATA_TIMEOUT: 1200,
 
   //What color the text and bg should have on the senseHAT on the raspberryPi
   PI_TEXT_COLOR: [227, 33, 25],
-  PI_BG_COLOR: [0, 255, 0],
+  PI_BG_COLOR: [0, 0, 0],
 };
