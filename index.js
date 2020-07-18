@@ -1,6 +1,7 @@
 const http = require("http");
 const NodeCache = require("node-cache");
 const Scoot = require("./src/Scoot");
+const Display = require("./src/Display");
 const { setConfigCoordinates } = require("./src/utils");
 
 const config = require("./config");
@@ -11,10 +12,11 @@ const main = async () => {
   const configWithCoords = await setConfigCoordinates(config);
 
   const scoot = new Scoot(cache, configWithCoords);
+  new Display(scoot, configWithCoords);
 
   http.createServer(async (req, res) => {
       if (req.url != "/favicon.ico") {
-        let { distanceData } = scoot.closestScoot;
+        let { distanceData } = await scoot.getClosestScooter();
 
         res.write(
           `Closest scooter is ${distanceData.duration} minutes away and ${distanceData.distance} meters away`

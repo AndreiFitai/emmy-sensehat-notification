@@ -1,15 +1,6 @@
 const request = require("superagent");
 const { hashFunction, getDistanceData} = require("./utils");
 
-// temporary solution since i'm not developing on the RpI
-let sense;
-try {
-  sense = require("sense-hat-led");
-  console.log("----- SenseHat was detected ! ------");
-} catch (e) {
-  console.log("----- Can't detect a SenseHat attached to system ! ------");
-}
-
 module.exports = class Scoot {
   constructor(cache, config) {
     this.cache = cache;
@@ -55,55 +46,28 @@ module.exports = class Scoot {
       const closestScooter = hasEnoughFuel.reduce((min, curr) =>
         min.distanceData.duration < curr.distanceData.duration ? min : curr
       );
+      
       // no point in saving walking duration in seconds so i'm converting it to minutes and rounding up
       closestScooter.distanceData.duration = Math.round(closestScooter.distanceData.duration / 60)
 
+      this.closestScoot = closestScooter; 
       return closestScooter;
     } catch (e) {
       console.error(e);
     }
   }
 
-  async refreshClosestScooter(){
+  refreshClosestScooter(){
     // gets the closest scooter every 15 minutes
-    this.closestScoot = await this.getClosestScooter();
+    this.getClosestScooter();
     setTimeout(() => {
       this.refreshClosestScooter()
     }, 900000);
   }
 
-  async displayOnPi() {
-    let message;
-    sense.lowLight = true;
-    // make sure orientation on the rPI is optimal
-    sense.setRotation(180)
-    let isDisplayClear = true;
 
-    setInterval(() => {
-      if(this.closestScoot){
-        const { distanceData: { distance, duration} } =  this.closestScoot;
-        message = ` ${duration} mins - ${distance} m `
-      } else {
-        message = "No scooter nearby :("
-      }
-      if(isDisplayClear) {
-        sense.showMessage(
-          message,
-          0.05,
-          this.config.PI_TEXT_COLOR,
-          this.config.PI_BG_COLOR,
-          () => { isDisplayClear = true}
-        );
-      }
-      isDisplayClear = false;
-    }, 2000);
+  init() {
+    this.refreshClosestScooter();
   }
   
-
-  async init() {
-    this.refreshClosestScooter();
-    if (sense) {
-      this.displayOnPi();
-    }
-  }
 };
