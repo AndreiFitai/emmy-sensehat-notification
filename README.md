@@ -21,3 +21,6 @@ I initially wanted to use the opensource geocodding api offered by MapQuest and 
 
 - MapQuests api doesn't geocode German specific addresses properly ( e.g. "B96a 70e, 10437, Berlin" returns coordinates located in Kansas and don't worry it's a coincidence there's a small town called Oberlin there )
 - openrouteservice.org doesn't have enough walking route accuracy for my personal preference and in some cases where the scooter was 50 meters away from my home it suggested a way longer route.
+
+
+./node_modules/.bin/web-push generate-vapid-keys

@@ -21,10 +21,8 @@ module.exports = class Display {
 
     setInterval(() => {
       let message = " No scooter nearby :( ";
-
-      if(this.scoot.closestScoot){
+      if(this.scoot.closestScoot.distanceData){
         const { distanceData: { distance, duration} } =  this.scoot.closestScoot;
-        console.log(this.scoot)
         message = ` ${duration} mins - ${distance} m `
       }
 
