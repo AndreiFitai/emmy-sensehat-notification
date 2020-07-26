@@ -16,30 +16,34 @@ module.exports = class Display {
 
   async displayOnPi() {
     sense.lowLight = true; // not sure if this does anything
-    sense.setRotation(180) // make sure orientation on the rPI is right
+    sense.setRotation(180); // make sure orientation on the rPI is right
     let isDisplayClear = true;
 
     // looping the message on the display
     setInterval(() => {
       let message = " No scooter nearby :( ";
-      if(this.scoot.closestScoot.distanceData){
-        const { distanceData: { distance, duration} } =  this.scoot.closestScoot;
-        message = ` ${duration} mins - ${distance} m `
+      if (this.scoot.closestScoot.distanceData) {
+        const {
+          distanceData: { distance, duration },
+        } = this.scoot.closestScoot;
+        message = ` ${duration} mins - ${distance} m `;
       }
 
-      if(isDisplayClear) {
+      if (isDisplayClear) {
         isDisplayClear = false;
         sense.showMessage(
           message,
           0.05,
           this.config.PI_TEXT_COLOR,
           this.config.PI_BG_COLOR,
-          () => { isDisplayClear = true}
+          () => {
+            isDisplayClear = true;
+          }
         );
       }
     }, 2000);
   }
-  
+
   init() {
     if (sense) {
       this.displayOnPi();

@@ -1,13 +1,13 @@
 const request = require("superagent");
-const deepEqual = require('deep-equal');
-const { hashFunction, getDistanceData} = require("./utils");
+const deepEqual = require("deep-equal");
+const { hashFunction, getDistanceData } = require("./utils");
 
 module.exports = class Scoot {
   constructor(cache, config, eventSender) {
     this.cache = cache;
     this.config = config;
     this.closestScoot = {};
-    if(eventSender) this.eventSender = eventSender;
+    if (eventSender) this.eventSender = eventSender;
     this.init();
   }
 
@@ -48,14 +48,16 @@ module.exports = class Scoot {
       const closestScooter = hasEnoughFuel.reduce((min, curr) =>
         min.distanceData.duration < curr.distanceData.duration ? min : curr
       );
-      
-      closestScooter.distanceData.duration = Math.round(closestScooter.distanceData.duration / 60)
 
-      if(this.eventSender && !deepEqual(this.closestScoot, closestScooter)){
-        this.eventSender.publish(JSON.stringify(closestScooter))
+      closestScooter.distanceData.duration = Math.round(
+        closestScooter.distanceData.duration / 60
+      );
+
+      if (this.eventSender && !deepEqual(this.closestScoot, closestScooter)) {
+        this.eventSender.publish(JSON.stringify(closestScooter));
       }
-  
-      this.closestScoot = closestScooter; 
+
+      this.closestScoot = closestScooter;
 
       return closestScooter;
     } catch (e) {
@@ -63,17 +65,15 @@ module.exports = class Scoot {
     }
   }
 
-  refreshClosestScooter(){
+  refreshClosestScooter() {
     // gets the closest scooter every 15 minutes
     this.getClosestScooter();
     setTimeout(() => {
-      this.refreshClosestScooter()
+      this.refreshClosestScooter();
     }, 900000);
   }
-
 
   init() {
     this.refreshClosestScooter();
   }
-  
 };
