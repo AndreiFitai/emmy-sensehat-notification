@@ -1,25 +1,26 @@
 const request = require("superagent");
+const deepEqual = require('deep-equal');
 const { hashFunction, getDistanceData} = require("./utils");
 
 module.exports = class Scoot {
-  constructor(cache, config) {
+  constructor(cache, config, eventSender) {
     this.cache = cache;
     this.config = config;
     this.closestScoot = {};
+    if(eventSender) this.eventSender = eventSender;
     this.init();
   }
 
   async getClosestScooter() {
     try {
       const { body: data } = await request
-        .get(`${this.config.EMMY_API_URL}map/cars`)
+        .get(`${this.config.EMMY_API_URL}`)
         .query({
           lat1: this.config.AREA_ADDRESS1_LAT,
           lon1: this.config.AREA_ADDRESS1_LNG,
           lat2: this.config.AREA_ADDRESS2_LAT,
           lon2: this.config.AREA_ADDRESS2_LNG,
         });
-
       //let's not look at scooters without enough "juice"
       let hasEnoughFuel = data.filter((scooter) => {
         return scooter.fuelLevel > this.config.MIN_FUEL_LEVEL;
@@ -28,6 +29,7 @@ module.exports = class Scoot {
       for (const scooter of hasEnoughFuel) {
         let { carId, address, zipCode } = scooter;
         const formattedAddress = `${address},${zipCode}`;
+
         //added the scooter id to hash in case two scooters ar at the same address
         const hash = hashFunction(`${carId}${formattedAddress}`);
         scooter.distanceData = this.cache.get(hash);
@@ -47,10 +49,14 @@ module.exports = class Scoot {
         min.distanceData.duration < curr.distanceData.duration ? min : curr
       );
       
-      // no point in saving walking duration in seconds so i'm converting it to minutes and rounding up
       closestScooter.distanceData.duration = Math.round(closestScooter.distanceData.duration / 60)
 
+      if(this.eventSender && !deepEqual(this.closestScoot, closestScooter)){
+        this.eventSender.publish(JSON.stringify(closestScooter))
+      }
+  
       this.closestScoot = closestScooter; 
+
       return closestScooter;
     } catch (e) {
       console.error(e);

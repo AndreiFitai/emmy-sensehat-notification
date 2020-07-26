@@ -4,7 +4,7 @@ module.exports = {
   PORT: 3000,
 
   // set api base URLS and the maps API key
-  EMMY_API_URL: "https://emio-frontend.com/api/prod/v2.07/",
+  EMMY_API_URL: "https://emio-frontend.com/api/prod/v2.07/map/cars",
   GEOCODING_API_URL: "https://maps.googleapis.com/maps/api/geocode/json",
   DISTANCES_API_URL: "https://maps.googleapis.com/maps/api/distancematrix/json",
   MAPS_API_KEY: process.env.MAPS_API_KEY,
